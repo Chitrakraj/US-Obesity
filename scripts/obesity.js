@@ -374,9 +374,9 @@ dispatch.on("countyChange.everywhere", function(selectedCounty) {
 // Add listener for menu "loadMenuProgram" event
 dispatch.on("loadMenuProgram.programCountyMenu", function(programCountyMap, programComparisonMap, programColumnNames) {
     // Draw the drop-down menu for selecting a County
-    var select = d3.select("#program_menu")
-        .append("div")
+    var select = d3.select("#countyFilter3")
         .append("select")
+		.attr("class", "select-county")
         .on("change", function() { // Add listener for when menu changes
             dispatch.countyChange(this.value);
         });
@@ -405,8 +405,8 @@ dispatch.on("loadMenuProgram.programCountyMenu", function(programCountyMap, prog
 dispatch.on("loadMenuProgram.programCompareMenu", function(programCountyMap, programComparisonMap, programColumnNames) {
     // Draw the drop-down menu for selecting a comparison data
     var select = d3.select("#program_menu")
-        .append("div")
-        .append("select")
+        .append("select")		
+		.attr("class", "select-county")
         .on("change", function() { // Add listener for when menu changes
             programSelectedComparison = this.value;
             dispatch.updateGraphProgram(programCountyMap.get(selectedCounty),
@@ -441,8 +441,8 @@ dispatch.on("updateGraphProgram.bar",
         bottom: 30,
         left: 40
 		},
-		width = 1000 - margin.left - margin.right,
-		height = 500 - margin.top - margin.bottom;
+		width = 700 - margin.left - margin.right,
+		height = 400 - margin.top - margin.bottom;
 
 		var x0 = d3.scale.ordinal()
 			.rangeRoundBands([0, width], .1);
@@ -563,8 +563,8 @@ dispatch.on("updateGraphProgram.bar",
 
         legend.append("rect")
             .attr("x", width )
-            .attr("width", 18)
-            .attr("height", 18)
+            .attr("width", 12)
+            .attr("height", 12)
             .style("fill", color);
 
         legend.append("text")
@@ -574,7 +574,8 @@ dispatch.on("updateGraphProgram.bar",
             .style("text-anchor", "end")
             .text(function(d) {
                 return d;
-            });
+            })
+			.style("font-size","10px");
     })
 
 /**
@@ -663,8 +664,8 @@ dispatch.on("loadMenuFactor.factorCountyMenu", function(factorCountyMap, factorC
 dispatch.on("loadMenuFactor.factorCompareMenu", function(factorCountyMap, factorComparisonMap, factorColumnNames) {
     // Draw the drop-down menu for selecting a comparison data
     var select = d3.select("#factors_menu")
-        .append("div")
         .append("select")
+		.attr("class", "select-county")
         .on("change", function() { // Add listener for when menu changes
             factorSelectedComparison = this.value;
             dispatch.updateGraphFactor(factorCountyMap.get(selectedCounty),
@@ -699,8 +700,8 @@ dispatch.on("updateGraphFactor.bar",
         bottom: 30,
         left: 40
 			},
-			width = 1000 - margin.left - margin.right,
-			height = 500 - margin.top - margin.bottom;
+			width = 700 - margin.left - margin.right,
+			height = 400 - margin.top - margin.bottom;
 
 		var x0 = d3.scale.ordinal()
 			.rangeRoundBands([0, width], .1);
@@ -821,8 +822,8 @@ dispatch.on("updateGraphFactor.bar",
 
         legend.append("rect")
             .attr("x", width )
-            .attr("width", 18)
-            .attr("height", 18)
+            .attr("width", 12)
+            .attr("height", 12)
             .style("fill", color);
 
         legend.append("text")
@@ -832,7 +833,8 @@ dispatch.on("updateGraphFactor.bar",
             .style("text-anchor", "end")
             .text(function(d) {
                 return d;
-            });
+            })
+			.style("font-size","10px");
     })
 
 
@@ -897,7 +899,6 @@ dispatch.on("loadMenuRace.raceCountyMenu", function(raceCountyMap, raceCompariso
 
     // Draw the drop-down menu for selecting a County
     var select = d3.select("#countyFilter")
-        //.append("div")
         .append("select")
 		.attr("class","select-county")
         .on("change", function() { 
@@ -933,6 +934,7 @@ dispatch.on("loadMenuRace.raceCompareMenu", function(raceCountyMap, raceComparis
     var select = d3.select("#race_menu")
         .append("div")
         .append("select")
+		.style("width", "150px")
         .on("change", function() { // Add listener for when menu changes
             raceSelectedComparison = this.value;
             dispatch.updateGraphRace(raceCountyMap.get(selectedCounty),
@@ -1147,6 +1149,7 @@ dispatch.on("loadMenuAge.ageCompareMenu", function(ageCountyMap, ageComparisonMa
     var select = d3.select("#age_county_menu")
         .append("div")
         .append("select")
+		.style("width", "150px")
         .on("change", function() { // Add listener for when menu changes
             ageSelectedComparison = this.value;
             dispatch.updateGraphAge(ageCountyMap.get(selectedCounty),
@@ -1357,6 +1360,7 @@ dispatch.on("loadMenuIncome.incomeCompareMenu", function(incomeCountyMap, income
     var select = d3.select("#income_menu")
         .append("div")
         .append("select")
+		.style("width", "150px")
         .on("change", function() { // Add listener for when menu changes
             incomeSelectedComparison = this.value;
             dispatch.updateGraphIncome(incomeCountyMap.get(selectedCounty),
