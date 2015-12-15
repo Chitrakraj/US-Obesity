@@ -11,7 +11,7 @@ Final Project - Interactive Data Visualization
   
   
 # Link to Website
-[Project Link] (http://tkakar.github.io/DataVisFinal/index.html)
+[Project Link] (http://chitrakraj.github.io/US-Obesity/index.html)
 # Link to Screen Cast
 [Screen Cast Link] (http://tkakar.github.io/DataVisFinal/index.html)
 
