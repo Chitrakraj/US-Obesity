@@ -232,3 +232,129 @@ div.tooltip {
 	top:10px;
 	left:10px;
 }
+
+select {
+    -webkit-appearance: none;
+    padding-left: 10px;
+    border-radius: 0;
+    font-size: 12px;
+    height: 30px;
+    color: #333;    
+    border-bottom: 1px solid #999;
+    background: url(../img/arrow-down.png) no-repeat 98%;
+    background-color: #ffffff;
+    background-size: 10px;
+}
+select {
+    margin: 0 0 1em 0;
+}
+.select-county {
+    width: 100%;
+}
+.select-obese {
+    width: 150px;
+}
+select {
+    text-transform: none;
+}
+select, textarea {
+    font-family: inherit;
+    font-size: 100%;
+    margin: 0;
+}
+.left {
+    max-width: 400px;
+}
+
+.right {
+	max-width: 400px;
+    clear: none;
+    
+	float:  right;
+    /*vertical-align: top;*/
+}
+
+.bar {
+    fill: steelblue;
+    }
+
+.x.axis path {
+/*display: none;*/
+}
+
+.menu_align{
+   text-align: left;
+   width:150px;
+}
+
+.menu_alignC{
+   text-align: center;
+   
+}
+
+#clear{
+	clear:both;
+}
+
+path{
+	fill: none;
+	stroke-width: 2;
+	stroke: #000;
+}
+
+.tab_container{
+    padding:10px;
+    /*width = 1300px;*/
+    /*background-color: red;*/
+    margin:auto;
+}
+
+.menuL{
+    /*width:100px;*/
+    float:left;
+}
+
+.menuR{
+    /*width:100px;*/
+    float:right;
+}
+
+.left_menu{
+    width:100px;
+    /*float:left;*/
+}
+.chart{
+    float:left;
+}
+
+.interaction-all {
+    text-align: center;
+}
+
+#tab_tooltip {
+    position: absolute;
+    width:auto;
+    height: auto;
+    padding: 10px;
+    background-color: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    -mox-box-shadow: 4px 4px 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 4px 4px 10px rbga(0, 0, 0, 0.4) pointer-events: none;
+}
+#tab_tooltip.hidden {
+    opacity: 0;
+}
+#tab_tooltip p {
+    margin: 0;
+    font-family: sans-serif;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+#video{
+    padding:20;
+    text-align: center;
+}

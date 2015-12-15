@@ -2,55 +2,122 @@
 <meta charset="utf-8">
 
 <style>
-
 </style>
 
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="//d3js.org/queue.v1.min.js"></script>
 <script src="http://d3js.org/colorbrewer.v1.min.js"></script>
+
 <head>
-	<link rel="stylesheet" type="text/css" href="style/obesity.css">
+    <link rel="stylesheet" type="text/css" href="style/obesity.css">
 </head>
 
 <body>
-<div class="story header">
-	<div class="story header-inner">
-		<div class="container">
-			<div class="title main-1">
-				<h1>Obesity in Massachusetts </h1>
-				<h2>Visualizing obesity related factors and federal aid programs</h2>
-			</div>
+    <div class="story header">
+        <div class="story header-inner">
+            <div class="container">
+                <div class="title main-1">
+                    <h1>Obesity in Massachusetts </h1>
+                    <h2>Visualizing obesity related factors and federal aid programs</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="full-width section-intro">
+        <div class="container">
+            <p>Obesity is a severe public health issue in the US, where currently, one in three U.S. adults is obese. It is known to cause heart disease, stroke, type 2 diabetes and certain types of cancer. Through this project we want to highlight the condition of obesity in Massachusetts, socio-economic data of the state, some of the key obesity related factors and data of federal programs. Our goal is to help obesity policy and program decision makers in planning and allocating federal budgets to various food assistance programs.</p>
+            <p>Through this project we want to highlight some of the key factors that are known to cause obesity, show prevalence of obesity in population along with details of obesity programs available for the states - which would help the local government in decision making to plan programs to fight obesity and allocate budgets to these programs.</p>
+        </div>
+    </div>
+    <div class="full-width map-container">
+        <div class="container text-center">
+            <h4>Representation of Child Obesity in Massachusetts, 2014</h4>
+        </div>
+        <!-- The map and description on the left side -->
+        <div class="fixed-container">
+            <div class="fixed-left" data-top="100">
+                <div class="side-map">
+
+                </div>
+            </div>
+            <div class="container text-center" id="mapLegFC">
+                <div class="map-legend">
+
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <p>According to the most recent US obesity data, rates of obesity now exceed 35% in three states, 22 states have rates above 30% and every state is above 20%. Massachusetts has the fourth lowest adult obesity rate and there has been a decline in child obesity (2-4 years olds) in low income families. A map of Massachusetts showing child obesity in all counties based on USDA data released on February 2014.</p>
+        </div>
+
+    </div>
+    <div>
+        <div class="container">
+            <h2>Socio-Economic Characteristics</h2>
+        </div>
+        <div class="full-width section-se1">
+            <div class="container">
+                <p>The three visualizations below show the socio-economic characteristics (race, age and income) by county in Massachusetts and each county can be compared to average, most obese or least obese county. The counties with higher obesity rate have a relatively higher percent of hispanic and black population while lower obesity rate counties have a relatively higher white percent. Also higher obesity rates tend to have an above average child poverty rate and lower median household income with an exception of Nantucket (most obese county).</p>
+            </div>
+        </div>
+        <div class="container text-center" id="countyFilter"></div>
+    </div>
+
+    <div id="age_race_container" class="container clearfix text-center">
+        <div class="chart">
+            <div id="race_menu" class="menu_align"></div>
+            
+            <div id="race_bar"></div>
+			<div>
+                <h4>Obesity By Race</h4>
+            </div>
+        </div>
+        <div class="chart">
+            <div id="age_county_menu" class="menu_align"></div>
+            
+            <div id="age_bar"></div>
+			<div>
+                <h4>Obesity By Age</h4>
+            </div>
+        </div>
+		<div id="clear">
 		</div>
-	</div>
-</div>
-<div class="full-width section-intro">
-    <div class="container">
-      <p>Obesity is a severe public health issue in the US, where currently, one in three U.S. adults is obese. It is known to cause heart disease, stroke, type 2 diabetes and certain types of cancer. Through this project we want to highlight the condition  of obesity in Massachusetts, socio-economic data of the state, some of the key obesity related factors and data of federal programs. Our goal is to help obesity policy and program decision makers in planning and allocating federal budgets to various food assistance programs.</p>
-      <p>Through this project we want to highlight some of the key factors that are known to cause obesity, show prevalence of obesity in population along with details of obesity programs available for the states - which would help the local government in decision making to plan programs to fight obesity and allocate budgets to these programs.</p>
     </div>
-</div>
-<div class="full-width map-container">
-  <div class="container text-center">
-	<h4>Representation of Child Obesity in Massachusetts, 2011</h4>
-  </div>
-  <!-- The map and description on the left side -->
-  <div class="fixed-container">
-	<div class="fixed-left" data-top="100">
-	  <div class="side-map">
-	  
-	  </div>
+	
+	<div id="income_container" class="container clearfix text-center">
+		<div id= "income_menu" class="menu_alignC" ></div>
+		<div class="chart">		
+			<div id= "income_pie"></div>
+			<div>
+                <h4>Income By County</h4>
+            </div>
+		</div>
+		<div class="chart">
+			<div id= "income_state_pie"></div>
+			<div>
+                <h4>Comparsion with State</h4>
+            </div>
+		</div>
+		<div id="clear"> </div>
 	</div>
-	<div class="container text-center"" id="mapLegFC">
-	  <div class="map-legend">
-	  
-	  </div>
-	</div> 
-  </div>
-  <div class="full-width section-map">
-    <div class="container">
-      <p>According to the most recent US obesity data, rates of obesity now exceed 35% in three states, 22 states have rates above 30% and every state is above 20%. Massachusetts has the fourth lowest adult obesity rate and there has been a decline in child obesity (2-4 years olds) in low income families. A map of Massachusetts showing child obesity in all counties based on USDA data released on February 2014.</p>
+	<div class="full-width"></div>
+	<div>
+        <div class="container">
+            <h2>Factors related to obesity</h2>
+        </div>
+        <div class="full-width section-se1">
+            <div class="container">
+                <p>Next we visualize various factors related to obesity: access and proximity to grocery stores, availability of grocery stores convenience stores and different types of  restaurants, food insecurity and percent of students eligible for food assistance programs. Many of the more obese states have lower percent of students eligible for free lunch while the case is opposite for some of the lower obese counties. Suffolk is an exception with high child obesity rate and where the county has a high percent of student eligible for free lunch or reduced priced food. Also many of the obese counties have a lower percent of local vegetable farms.</p>
+            </div>
+        </div>
+        <div class="container text-center" id="countyFilter2"></div>
     </div>
-  </div>
-<script src="scripts/obesity.js"></script>
+	
+    <div id="tab_tooltip" class="hidden">
+        <p><span id="value"></span>%</p>
+    </div>
+    <script src="scripts/obesity.js"></script>
 </body>
+
 </html>

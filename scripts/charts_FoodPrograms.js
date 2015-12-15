@@ -1,185 +1,3 @@
-var outerWidth = 900,
-   outerHeight = 570;
-
-var mapMargin = {top: 30, right: 30, bottom: 10, left: 10};
-var width = outerWidth - mapMargin.left - mapMargin.right,
-	height = outerHeight - mapMargin.top - mapMargin.bottom;
-	
-var tooltip = d3.select("body").append("div").attr("class", "tooltip hidden");
-   
-var rateById = d3.map();
-var rateChangeById = d3.map();
-
-var quantize = d3.scale.quantize()
-    .domain([10, 25])
-    .range(d3.range(9).map(function(i) {return "q" + i + "-9"; }));
-
-var projection = d3.geo.mercator()
-		.center([-71.90, 42.97]) //.center([-70.00, 42.68])
-		.scale(12000)
-		.translate([width / 2, height / 33]);
-		//.attr('transform', 'translate(' + mapMargin.left + ',' + mapMargin.top + ')');
-
-var path = d3.geo.path()
-		.projection(projection);  //projection
-
-var fixedLeft = d3.select(".fixed-left");
-var svg_map = fixedLeft.select('.side-map').append('svg')
-				.attr("width", width)
-				.attr("height", height);
-  
-//var svg_map = d3.select("body").append("svg")
-  //  .attr("width", width)
-    //.attr("height", height);
-	
-queue()
-    .defer(d3.json, "ma-counties.json")
-    .defer(d3.csv, "data/data2014_health.csv", function(d) {  rateById.set(d.id, +d.Rate11); rateChangeById.set(d.id, +d.Change); })
-    .await(ready);
-	
-function ready(error, ma) {
-  if (error) throw error;
-	var county = svg_map.append("g")
-      .attr("class", "counties")
-    .selectAll("path")
-      .data(ma.features)
-    .enter().append("path")
-      .attr("class", function(d) {return quantize(rateById.get(d.properties.id)); })
-      .attr("d", path)
-	  .attr("id",function(d) {return d.properties.name})
-	  .on("mousedown", function() {
-			showCountyDetails(this);
-			dispatch.countyChange(this.id);
-		});
-	  var currentState;
-	//tooltips
-    county.on("mouseover", function(d,i){
-
-    		 var mouse = d3.mouse(svg_map.node()).map( function(d) { return parseInt(d); } );      
-    	       currentState = this;
-               d3.select(this).style('fill-opacity', 1);
-
-               var thoseStates = d3
-                       .selectAll('path')[0]
-                       .filter(function(state) {
-                           return state !== currentState;
-                       });
-
-               d3.selectAll(thoseStates)
-                       .style({
-                           'fill-opacity':.5
-                       });
-
-              tooltip.classed("hidden", false)
-		         .attr("style", "left:"+(mouse[0]+20)+"px;top:"+(mouse[1]+300)+"px")
-		         .html(displayChange(d.properties.id, d.properties.name));   
-
-               })
-                .on('mouseout', function(d, i) {
- 					tooltip.classed("hidden", true)
- 					.attr("style","z-index:-1;")
- 					
-                    d3.selectAll('path')
-                            .style({'fill-opacity':1
-                            });
-                })
-  
-  svg_map.append("g")
-      .attr("class", "names")
-	  .selectAll(".county-label")
-    .data(ma.features)
-  .enter().append("text")
-    .attr("class", function(d) { return "county-label " + d.properties.id; })
-    .attr("transform", function(d) {return "translate(" + (path.centroid(d)[0] -27) +","+ (path.centroid(d)[1]+8) + ")"; }) //path.centroid(d)
-    .attr("dy", ".35em")
-    .text(function(d) { return d.properties.name; });	
-}
-
-function displayChange(countyId, county){
-	var format = d3.format(".2n");
-	var formatter = d3.format("0"); 
-	var changePCT = rateChangeById.get(countyId);
-	if (changePCT > 0){
-		return "<b>" + county +"</b><br/>Increase by " + format(changePCT) + "% from 2008."
-	}
-	else if (changePCT < 0){
-		return "<b>" + county +"</b><br/>Decrease by " + formatter(format(-changePCT)) + "% from 2008."
-	}
-	else if (changePCT == 0){
-		return "<b>" + county +"</b><br/>No change since 2008."
-	}
-}
-
-function showCountyDetails(county){
-		console.log(county.id);
-	}
-
-d3.select(self.frameElement).style("height", height + "px");
-
-//linear gradient key
-var w = 850, h = 60;
-
-var mfixedLeft = d3.select("#mapLegFC");
-var key = mfixedLeft.select('.map-legend').append('svg')
-		  .attr("id", "key")
-		  .attr("width", w)
-		  .attr("height", h);
-			
-var legend = key.append("defs")
-				.append("svg:linearGradient")
-				.attr("id", "gradient")
-				.attr("x1","0%")
-				.attr("x2","100%")
-				.attr("y1","0%")
-				.attr("y2","0%")
-				.attr("spreadMethod", "pad");
-				
-legend.selectAll("stop")
-	.data([
-	{offset: "0%", color: "#fff5eb"},
-	{offset: "15%", color: "#fdae6b"},
-	{offset: "50%", color: "#fd8d3c"},
-	{offset: "60%", color: "#d94801"},
-	{offset: "100%", color: "#7f2704"}
-  ])
-.enter().append("stop")
-  .attr("offset", function(d) { return d.offset; })
-  .attr("stop-color", function(d) {return d.color; })
-  .attr("stop-opacity", 1);
-
-key.append("rect")
-	.attr("width", 300)
-	.attr("height", 15)
-	.style("fill", "url(#gradient)")
-	.attr("transform", "translate(250,2)");
-
-var y = d3.scale.linear()
-		.range([300, 0])
-		.domain([25, 10]);
-
-var yAxis = d3.svg.axis()
-			.scale(y)
-			.orient("bottom");
-
-key.append("g")
-	.attr("class", "y axis")
-	.attr("transform", "translate(250,2)")
-	.call(yAxis).append("text")
-	.attr("transform", "translate(270,2)")
-	.attr("y", 20).attr("dy", ".71em")
-	.style("text-anchor", "end").text("% Obesity rate");
-//end key
-
-
-
-
-
-
-
-
-
-
-
 // Constants
 var AVERAGE = "Average"
 var MOST_OBESE = "Most obese"
@@ -435,35 +253,6 @@ dispatch.on("loadMenuProgram.programCompareMenu", function(programCountyMap, pro
 // Add listener for "updateGraphs" event
 dispatch.on("updateGraphProgram.bar",
     function(selectedCountyData, selectedComparisonData, programColumnNames) {
-		var margin = {
-        top: 20,
-        right: 20,
-        bottom: 30,
-        left: 40
-		},
-		width = 1000 - margin.left - margin.right,
-		height = 500 - margin.top - margin.bottom;
-
-		var x0 = d3.scale.ordinal()
-			.rangeRoundBands([0, width], .1);
-
-		var x1 = d3.scale.ordinal();
-
-		var y = d3.scale.linear()
-			.range([height, 0]);
-
-		var color = d3.scale.ordinal()
-			//.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
-			.range(["#e31a1c", "#feb24c", "#fd8d3c", "#ffeda0", "#fc4e2a", "#bd0026", "#fed976", "#800026"]);
-
-		var xAxis = d3.svg.axis()
-			.scale(x0)
-			.orient("bottom");
-
-		var yAxis = d3.svg.axis()
-			.scale(y)
-			.orient("left")
-			.tickFormat(d3.format(".2s"));
         // Remove existing svg
         d3.selectAll("#program_bar svg").remove();
         // Draw the bar chart
@@ -633,9 +422,9 @@ d3.csv("data/data2014_Factors_AllCounties.csv", function(error, allDataRows) {
 
 dispatch.on("loadMenuFactor.factorCountyMenu", function(factorCountyMap, factorComparisonMap, factorColumnNames) {
     // Draw the drop-down menu for selecting a County
-    var select = d3.select("#countyFilter2")
+    var select = d3.select("#factors_menu")
+        .append("div")
         .append("select")
-		.attr("class","select-county")
         .on("change", function() { // Add listener for when menu changes
             dispatch.countyChange(this.value);
         });
@@ -693,35 +482,6 @@ dispatch.on("loadMenuFactor.factorCompareMenu", function(factorCountyMap, factor
 // Add listener for "updateGraphs" event
 dispatch.on("updateGraphFactor.bar",
     function(selectedCountyData, selectedComparisonData, factorColumnNames) {
-		var margin = {
-        top: 20,
-        right: 20,
-        bottom: 30,
-        left: 40
-			},
-			width = 1000 - margin.left - margin.right,
-			height = 500 - margin.top - margin.bottom;
-
-		var x0 = d3.scale.ordinal()
-			.rangeRoundBands([0, width], .1);
-
-		var x1 = d3.scale.ordinal();
-
-		var y = d3.scale.linear()
-			.range([height, 0]);
-
-		var color = d3.scale.ordinal()
-			//.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
-			.range(["#e31a1c", "#feb24c", "#fd8d3c", "#ffeda0", "#fc4e2a", "#bd0026", "#fed976", "#800026"]);
-
-		var xAxis = d3.svg.axis()
-			.scale(x0)
-			.orient("bottom");
-
-		var yAxis = d3.svg.axis()
-			.scale(y)
-			.orient("left")
-			.tickFormat(d3.format(".2s"));
         // Remove existing svg
         d3.select("#factors_bar svg").remove();
         // Draw the bar chart
@@ -896,10 +656,9 @@ dispatch.on("loadMenuRace.raceCountyMenu", function(raceCountyMap, raceCompariso
 
 
     // Draw the drop-down menu for selecting a County
-    var select = d3.select("#countyFilter")
-        //.append("div")
+    var select = d3.select("#race_menu")
+        .append("div")
         .append("select")
-		.attr("class","select-county")
         .on("change", function() { 
         // Add listener for when menu changes
         // console.log(this.value)
@@ -964,8 +723,8 @@ dispatch.on("loadMenuRace.raceCompareMenu", function(raceCountyMap, raceComparis
 });
 // Add listener
 dispatch.on("updateGraphRace.bar", function(selectedCountyData, selectedComparisonData, raceColumnNames) {
-    var race_width=380- margin.left - margin.right,
-    race_height = 300 - margin.top - margin.bottom;
+    var race_width=500- margin.left - margin.right,
+    race_height = 400 - margin.top - margin.bottom;
 
     var x = d3.scale.ordinal()
     .rangeRoundBands([0, race_width]);
@@ -989,7 +748,7 @@ dispatch.on("updateGraphRace.bar", function(selectedCountyData, selectedComparis
     d3.select("#race_bar svg").remove();
     var svg = d3.select("#race_bar").append("svg")
         .attr("width", race_width + margin.left + margin.right)
-        .attr("height", race_height + margin.top + margin.bottom)
+        .attr("height", race_width + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -1014,10 +773,9 @@ dispatch.on("updateGraphRace.bar", function(selectedCountyData, selectedComparis
 
   svg.append("g").attr("class", "y label")
       .attr("transform", "rotate(-90)")
-      .append("text").attr("x", -(race_height)/2)
+      .append("text").attr("x", -(height-margin.left-margin.right)/2)
       .attr("y",-30).attr("text-anchor", "middle")
-      .text("Percentage")
-	  .style("font-size","10px"); 
+      .text("Percentage"); 
 
     var state = svg.selectAll(".state")
         .data(selectedCountyData.columns)
@@ -1068,10 +826,10 @@ dispatch.on("updateGraphRace.bar", function(selectedCountyData, selectedComparis
                   }
                   else if(i==selectedComparisonData[0].columns.length-1){
                     // console.log(x(d.name)+10, y(d.value))
-                    return x(d.name)+65;
+                    return x(d.name)+85;
                   }
                   else
-                    return x(d.name)+35;
+                    return x(d.name)+45;
                  })
                 .y(function(d) {  
                          // console.log( d.value, y(d.value)); 
@@ -1141,6 +899,41 @@ d3.csv("data/age.csv", function(error, age_allDataRows) {
     });
 });
 
+
+// Add listener for menu "loadMenuRace" event
+dispatch.on("loadMenuAge.ageCountyMenu", function(ageCountyMap, ageComparisonMap, ageColumnNames) {
+
+
+    // Draw the drop-down menu for selecting a County
+    var select = d3.select("#age_county_menu")
+        .append("div")
+        .append("select")
+        .on("change", function() { 
+        // Add listener for when menu changes
+        // console.log(this.value)
+            dispatch.countyChange(this.value);
+        });
+
+    // Populate menu with options
+    select.selectAll("option")
+        .data(ageCountyMap.values())
+        .enter()
+        .append("option")
+        .attr("value", function(d) {
+            return d.County;
+        })
+        .text(function(d) {
+            return d.County;
+        });
+
+    // Add listener for "updateGraphs" event
+    dispatch.on("updateGraphAge.countymenu", function(selectedCountyData, selectedComparisonData, ageColumnNames) {
+        selectedCounty = selectedCountyData.County;
+        select.property("value", selectedCounty);
+           // console.log(selectedCounty +"P HI"+ raceColumnNames)
+    });
+});
+
 // Add listener for "loadMenuRace" event
 dispatch.on("loadMenuAge.ageCompareMenu", function(ageCountyMap, ageComparisonMap, ageColumnNames) {
     // Draw the drop-down menu for selecting a comparison data
@@ -1179,8 +972,8 @@ dispatch.on("updateGraphAge.bar", function(selectedCountyData, selectedCompariso
 
     // console.log("First time" +raceColumnNames)
 
-    var race_width=300- margin.left - margin.right,
-        race_height = 300 - margin.top - margin.bottom;
+    var race_width=500- margin.left - margin.right,
+        race_height = 400 - margin.top - margin.bottom;
 
     var x = d3.scale.ordinal()
      .rangeRoundBands([0, race_width]);
@@ -1283,7 +1076,7 @@ dispatch.on("updateGraphAge.bar", function(selectedCountyData, selectedCompariso
                       }
 
                       else
-                        return x(d.name)+110;
+                        return x(d.name)+150;
                      })
                     .y(function(d) {  
                              // console.log( d.value, y(d.value)); 
@@ -1351,6 +1144,41 @@ d3.csv("data/income.csv", function(error, income_allDataRows) {
     });
 });
 
+
+// Add listener for menu "loadMenuIncome" event
+dispatch.on("loadMenuIncome.incomeCountyMenu", function(incomeCountyMap, incomeComparisonMap, incomeColumnNames) {
+
+
+    // Draw the drop-down menu for selecting a County
+    var select = d3.select("#income_menu")
+        .append("div")
+        .append("select")
+        .on("change", function() { 
+        // Add listener for when menu changes
+        console.log(this.value)
+            dispatch.countyChange(this.value);
+        });
+
+    // Populate menu with options
+    select.selectAll("option")
+        .data(incomeCountyMap.values())
+        .enter()
+        .append("option")
+        .attr("value", function(d) {
+            return d.County;
+        })
+        .text(function(d) {
+            return d.County;
+        });
+
+    // Add listener for "updateGraphs" event
+    dispatch.on("updateGraphIncome.countymenu", function(selectedCountyData, selectedComparisonData, incomeColumnNames) {
+        selectedCounty = selectedCountyData.County;
+        select.property("value", selectedCounty);
+           // console.log(selectedCounty +"P HI"+ raceColumnNames)
+    });
+});
+
 // Add listener for "loadMenuRace" event
 dispatch.on("loadMenuIncome.incomeCompareMenu", function(incomeCountyMap, incomeComparisonMap, incomeColumnNames) {
     // Draw the drop-down menu for selecting a comparison data
@@ -1388,8 +1216,8 @@ dispatch.on("loadMenuIncome.incomeCompareMenu", function(incomeCountyMap, income
 
 dispatch.on("updateGraphIncome.incomepie", function(selectedCountyData, selectedComparisonData, incomeColumnNames) {
 
-   var  width = 300- margin.left - margin.right,
-    height = 300 - margin.top - margin.bottom;
+   var  width = 500- margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
     var radius = Math.min(width, height) / 2;
     var arc = d3.svg.arc()
         .outerRadius(radius - 10)
@@ -1409,7 +1237,7 @@ dispatch.on("updateGraphIncome.incomepie", function(selectedCountyData, selected
     // console.log(selectedCountyData.columns)
     d3.select("#income_pie svg").remove();
     var svg = d3.select("#income_pie").append("svg")
-        .attr("width", width+200)
+        .attr("width", width)
         .attr("height", height)
       .append("g")
      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
@@ -1449,36 +1277,11 @@ dispatch.on("updateGraphIncome.incomepie", function(selectedCountyData, selected
           .text(function(d) { //console.log(d,d.data.name) ;
                 return d.data.value + "%"; })
           .style("font-size", "14px");
-		  
-		//legend
-        var legend = svg.selectAll(".legend")
-            .data(incomeColumnNames.slice().reverse())
-            .enter().append("g")
-            .attr("class", "legend")
-            .attr("transform", function(d, i) {
-                return "translate(20," + i * 20 + ")";
-            });
-
-        legend.append("rect")
-            .attr("x", width)
-            .attr("width", 18)
-            .attr("height", 18)
-            .style("fill", color);
-
-        legend.append("text")
-            .attr("x", width - 15)
-            .attr("y", 9)
-            .attr("dy", ".35em")
-            .style("text-anchor", "end")
-            .style("font-size", "12px")
-            .text(function(d) {
-                return d;
-            });
 
 
         d3.select("#income_state_pie svg").remove();
         var State_svg = d3.select("#income_state_pie").append("svg")
-        .attr("width", width)
+        .attr("width", width +300)
         .attr("height", height)
         .append("g")
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
@@ -1518,8 +1321,30 @@ dispatch.on("updateGraphIncome.incomepie", function(selectedCountyData, selected
             return d.data.value + "%"; })
           .style("font-size", "14px");
          
-         
-})
+          //legend
+        var legend = State_svg.selectAll(".legend")
+            .data(incomeColumnNames.slice().reverse())
+            .enter().append("g")
+            .attr("class", "legend")
+            .attr("transform", function(d, i) {
+                return "translate(0," + i * 20 + ")";
+            });
 
+        legend.append("rect")
+            .attr("x", width - 100)
+            .attr("width", 18)
+            .attr("height", 18)
+            .style("fill", color);
+
+        legend.append("text")
+            .attr("x", width - 125)
+            .attr("y", 9)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .style("font-size", "12px")
+            .text(function(d) {
+                return d;
+            });
+})
 
 
